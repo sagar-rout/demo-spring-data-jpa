@@ -1,4 +1,4 @@
-package com.example.demospringdatajpa.model;
+package com.example.demospringdatajpa.domain;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;

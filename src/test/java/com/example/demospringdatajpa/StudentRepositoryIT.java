@@ -1,8 +1,11 @@
 package com.example.demospringdatajpa;
 
-import com.example.demospringdatajpa.model.Department;
-import com.example.demospringdatajpa.model.Student;
+import com.example.demospringdatajpa.domain.Department;
+import com.example.demospringdatajpa.domain.Student;
+import com.example.demospringdatajpa.model.Gender;
+import com.example.demospringdatajpa.model.Nationality;
 import com.example.demospringdatajpa.repo.StudentRepository;
+import com.example.demospringdatajpa.repo.projection.StudentProjectionDto;
 import com.vladmihalcea.sql.SQLStatementCountValidator;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,6 +29,7 @@ public class StudentRepositoryIT {
 
     @Autowired
     private StudentRepository studentRepository;
+
     @Autowired
     private TestEntityManager testEntityManager;
 
@@ -39,8 +43,7 @@ public class StudentRepositoryIT {
 
         // GIVEN
         final var age = 20;
-        final var students = Set.of(new Student().setAge(age).setName("Sagar"));
-        final var department = new Department().setName("Science").setStudents(students);
+        final var department = create_test_data(age);
 
         testEntityManager.persistAndFlush(department);
 
@@ -53,5 +56,29 @@ public class StudentRepositoryIT {
         Assertions.assertThat(studentsWithAge20).hasSize(1);
     }
 
+    @Test
+    public void get_data_using_projections_read_only() {
+        // GIVEN
+        final var age = 20;
+        final var department = create_test_data(age);
 
+        testEntityManager.persistAndFlush(department);
+
+        // WHEN
+        final var studentsWithAge20 = studentRepository.findStudentsByAge(20);
+
+        // THEN
+        SQLStatementCountValidator.assertInsertCount(2);
+        SQLStatementCountValidator.assertSelectCount(1);
+        Assertions.assertThat(studentsWithAge20).extracting(StudentProjectionDto::getName).containsOnly("Sagar");
+        Assertions.assertThat(studentsWithAge20).hasSize(1);
+    }
+
+    private Department create_test_data(int age) {
+        final var student = new Student().setAge(age)
+                .setName("Sagar")
+                .setNationality(Nationality.INDIAN)
+                .setGender(Gender.MALE);
+        return new Department().setName("Science").setStudents(Set.of(student));
+    }
 }
