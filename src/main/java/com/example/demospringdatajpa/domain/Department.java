@@ -1,10 +1,14 @@
 package com.example.demospringdatajpa.domain;
 
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import java.time.ZonedDateTime;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -20,6 +24,12 @@ public class Department {
     private Set<Student> students = new HashSet<>();
 
     private String name;
+
+    @CreationTimestamp
+    private ZonedDateTime dateCreated;
+
+    @UpdateTimestamp
+    private ZonedDateTime lastUpdated;
 
     public UUID getId() {
         return id;
@@ -46,5 +56,13 @@ public class Department {
     public Department setName(String name) {
         this.name = name;
         return this;
+    }
+
+    public ZonedDateTime getDateCreated() {
+        return dateCreated;
+    }
+
+    public ZonedDateTime getLastUpdated() {
+        return lastUpdated;
     }
 }

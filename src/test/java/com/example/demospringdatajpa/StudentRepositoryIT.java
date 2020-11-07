@@ -17,8 +17,10 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.util.List;
 import java.util.Set;
 
 @DataJpaTest
@@ -72,6 +74,27 @@ public class StudentRepositoryIT {
         SQLStatementCountValidator.assertSelectCount(1);
         Assertions.assertThat(studentsWithAge20).extracting(StudentProjectionDto::getName).containsOnly("Sagar");
         Assertions.assertThat(studentsWithAge20).hasSize(1);
+    }
+
+    @Test
+    public void get_auditing_data(){
+        // GIVEN
+        final var age = 20;
+        final var department = create_test_data(age);
+
+        testEntityManager.persistAndFlush(department);
+
+        // WHEN
+        final var students = studentRepository.findAll();
+
+        students.forEach(System.out::println);
+
+        // THEN
+        SQLStatementCountValidator.assertInsertCount(2);
+        SQLStatementCountValidator.assertSelectCount(1);
+        Assertions.assertThat(students).extracting(Student::getDateCreated).doesNotContainNull();
+        Assertions.assertThat(students).extracting(Student::getLastUpdated).doesNotContainNull();
+        Assertions.assertThat(students).hasSize(1);
     }
 
     private Department create_test_data(int age) {
