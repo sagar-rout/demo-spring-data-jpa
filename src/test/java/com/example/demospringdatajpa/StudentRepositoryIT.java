@@ -17,11 +17,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-
-import java.util.List;
-import java.util.Set;
 
 @DataJpaTest
 @ExtendWith(SpringExtension.class)
@@ -77,7 +73,7 @@ public class StudentRepositoryIT {
     }
 
     @Test
-    public void get_auditing_data(){
+    public void get_auditing_data() {
         // GIVEN
         final var age = 20;
         final var department = create_test_data(age);
@@ -98,10 +94,12 @@ public class StudentRepositoryIT {
     }
 
     private Department create_test_data(int age) {
+        final var department = new Department().setName("Science");
         final var student = new Student().setAge(age)
                 .setName("Sagar")
                 .setNationality(Nationality.INDIAN)
                 .setGender(Gender.MALE);
-        return new Department().setName("Science").setStudents(Set.of(student));
+        department.addStudent(student);
+        return department;
     }
 }

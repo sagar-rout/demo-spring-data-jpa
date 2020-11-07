@@ -16,18 +16,21 @@ class TestDataSourceConfiguration implements BeanPostProcessor {
 
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+        Object result = bean;
         if (bean instanceof DataSource) {
             ChainListener listener = new ChainListener();
             SLF4JQueryLoggingListener loggingListener = new SLF4JQueryLoggingListener();
             loggingListener.setQueryLogEntryCreator(new DefaultQueryLogEntryCreator());
+
             listener.addListener(loggingListener);
             listener.addListener(new DataSourceQueryCountListener());
-            return ProxyDataSourceBuilder
+            result = ProxyDataSourceBuilder
                     .create((DataSource) bean)
                     .name("DS-Proxy")
+                    .logQueryBySlf4j("DEBUG")
                     .listener(listener)
                     .build();
         }
-        return bean;
+        return result;
     }
 }
